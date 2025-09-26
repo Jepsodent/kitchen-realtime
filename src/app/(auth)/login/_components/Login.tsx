@@ -1,5 +1,6 @@
 "use client";
 
+import FormInput from "@/components/common/form-input";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,16 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Form } from "@/components/ui/form";
 import { INITIAL_LOGIN_FORM } from "@/constants/auth-constant";
 import { LoginForm, loginSchema } from "@/validations/auth-validation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,42 +37,20 @@ export default function Login() {
       <CardContent>
         <Form {...form}>
           <form action="" onSubmit={onSubmit} className="flex  flex-col gap-6">
-            <FormField
+            <FormInput
+              form={form}
+              label="Email"
               name="email"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="email"
-                      autoComplete="off"
-                      placeholder="example@gmail.com"
-                    ></Input>
-                  </FormControl>
-                  <FormMessage className="text-xs" />
-                </FormItem>
-              )}
-            />
-            <FormField
+              placeholder="example@gmail.com"
+              type="email"
+            ></FormInput>
+            <FormInput
+              form={form}
+              label="Password"
               name="password"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="password"
-                      autoComplete="off"
-                      placeholder="****"
-                    ></Input>
-                  </FormControl>
-                  <FormMessage className="text-xs" />
-                </FormItem>
-              )}
-            />
+              placeholder="********"
+              type="password"
+            ></FormInput>
             <Button type="submit" className="w-full">
               Login
             </Button>
