@@ -28,6 +28,7 @@ import {
 } from "@/constants/sidebar-constants";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import { signOut } from "@/actions/auth-action";
 
 export default function AppSidebar() {
   const { isMobile } = useSidebar();
@@ -125,7 +126,10 @@ export default function AppSidebar() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem className="hover:bg-accent">
+                  <DropdownMenuItem
+                    className="hover:bg-accent"
+                    onClick={() => signOut()}
+                  >
                     <div className="flex items-center gap-2 px-3 py-1.5">
                       <LogOut className="size-4" />
                       Logout
