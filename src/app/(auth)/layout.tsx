@@ -8,7 +8,7 @@ type AuthLayoutProps = {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="relative bg-blend-darken flex min-h-svh flex-col items-center justify-center gap-6 p-6 ">
+    <div className="relative bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 ">
       <div className="absolute top-5 right-5">
         <DarkToggle />
       </div>
