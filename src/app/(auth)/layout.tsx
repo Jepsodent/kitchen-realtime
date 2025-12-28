@@ -14,7 +14,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
       <div className="w-full flex max-w-sm flex-col gap-6">
         <div className="flex items-center gap-2 self-center font-medium">
-          <div className="bg-green-700 dark:bg-green-900 flex items-center p-2 rounded-md">
+          <div className="bg-teal-500 flex items-center p-2 rounded-md">
             <ChefHat className="size-4" />
           </div>
           Cafe
