@@ -29,15 +29,12 @@ import {
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/actions/auth-action";
+import { useAuthStore } from "@/stores/auth-store";
 
 export default function AppSidebar() {
   const { isMobile } = useSidebar();
   const pathname = usePathname();
-  const profile = {
-    name: "Jefferson",
-    role: "admin",
-    avatar_url: "",
-  };
+  const profile = useAuthStore((state) => state.profile);
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -92,13 +89,15 @@ export default function AppSidebar() {
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground "
                 >
                   <Avatar className="w-8 h-8 rounded-lg">
-                    <AvatarImage src={""} alt="" />
-                    <AvatarFallback className="rounded-lg">A</AvatarFallback>
+                    <AvatarImage src={profile.avatar_url} alt={profile.name} />
+                    <AvatarFallback className="rounded-lg">
+                      {profile.name?.charAt(0)}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="leading-tight">
-                    <h4 className="truncate font-medium">Jefferson</h4>
-                    <p className="text-muted-foreground truncate text-xs">
-                      Admin
+                    <h4 className="truncate font-medium">{profile.name}</h4>
+                    <p className="text-muted-foreground truncate text-xs capitalize">
+                      {profile.role}
                     </p>
                   </div>
                   <EllipsisVertical className="ml-auto size-4" />
@@ -113,13 +112,15 @@ export default function AppSidebar() {
                 <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5">
                     <Avatar className="w-8 h-8 rounded-lg">
-                      <AvatarImage src={""} alt="" />
-                      <AvatarFallback className="rounded-lg">A</AvatarFallback>
+                      <AvatarImage src={profile.avatar_url} alt="" />
+                      <AvatarFallback className="rounded-lg">
+                        {profile.name?.charAt(0)}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="leading-tight">
-                      <h4 className="truncate font-medium">Jefferson</h4>
-                      <p className="text-muted-foreground truncate text-xs">
-                        Admin
+                      <h4 className="truncate font-medium">{profile.name}</h4>
+                      <p className="text-muted-foreground truncate text-xs capitalize">
+                        {profile.role}
                       </p>
                     </div>
                   </div>
@@ -130,9 +131,9 @@ export default function AppSidebar() {
                     className="hover:bg-accent"
                     onClick={() => signOut()}
                   >
-                    <div className="flex items-center gap-2 px-3 py-1.5">
-                      <LogOut className="size-4" />
-                      Logout
+                    <div className="flex items-center  gap-2 px-3 py-1.5">
+                      <LogOut className="size-4 " />
+                      <span className="text-sm font-medium">Logout</span>
                     </div>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>

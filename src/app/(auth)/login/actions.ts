@@ -45,7 +45,6 @@ export async function login(prevState: AuthFormState, formData: FormData | null)
 
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', user?.id).single();
 
-
     if (profile) {
         const cookieStore = await cookies();
         cookieStore.set('user_profile', JSON.stringify(profile), {
