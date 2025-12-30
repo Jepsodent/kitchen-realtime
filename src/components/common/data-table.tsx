@@ -8,15 +8,37 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import PaginationDataTable from "./pagination-data-table";
+import { Label } from "../ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { LIMIT_LISTS } from "@/constants/data-table-constant";
 
 export default function DataTable({
   header,
   data,
   isLoading,
+  totalPages,
+  currentPage,
+  currentLimit,
+  onChangePage,
+  onChangeLimit,
 }: {
   header: string[];
   data: (string | ReactNode)[][];
   isLoading?: boolean;
+  totalPages: number;
+  currentPage: number;
+  currentLimit: number;
+  onChangePage: (page: number) => void;
+  onChangeLimit: (limit: number) => void;
 }) {
   return (
     <div className="w-full flex flex-col gap-4">
@@ -62,6 +84,39 @@ export default function DataTable({
           </TableBody>
         </Table>
       </Card>
+      <div className="flex  items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Label>Limit</Label>
+          <Select
+            value={currentLimit.toString()}
+            onValueChange={(value) => onChangeLimit(Number(value))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select Limit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>
+                  {LIMIT_LISTS.map((limit) => (
+                    <SelectItem key={limit} value={limit.toString()}>
+                      {limit}
+                    </SelectItem>
+                  ))}
+                </SelectLabel>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+        {totalPages > 1 && (
+          <div className="flex justify-end">
+            <PaginationDataTable
+              onChangePage={onChangePage}
+              currentPage={currentPage}
+              totalPages={totalPages}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
