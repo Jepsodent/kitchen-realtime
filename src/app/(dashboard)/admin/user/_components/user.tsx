@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import DropdownAction from "@/components/common/dropdown-action";
 import { Pencil, Trash2 } from "lucide-react";
 import useDataTable from "@/hooks/use-data-table";
+import DialogCreateUser from "./dialog-create-user";
 
 export default function UserManagement() {
   const supabase = createClient();
@@ -24,7 +25,11 @@ export default function UserManagement() {
     handleChangeSearch,
   } = useDataTable();
 
-  const { data: users, isLoading } = useQuery({
+  const {
+    data: users,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["users", currentPage, currentLimit, currentSearch],
     queryFn: async () => {
       const result = await supabase
@@ -110,6 +115,7 @@ export default function UserManagement() {
             <DialogTrigger asChild>
               <Button variant={"outline"}>Create</Button>
             </DialogTrigger>
+            <DialogCreateUser refetch={refetch} />
           </Dialog>
         </div>
       </div>

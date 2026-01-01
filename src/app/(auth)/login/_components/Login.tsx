@@ -55,7 +55,6 @@ export default function Login() {
       });
     }
   }, [loginState]);
-  console.log(loginState);
 
   return (
     <Card className="w-full max-w-sm">
