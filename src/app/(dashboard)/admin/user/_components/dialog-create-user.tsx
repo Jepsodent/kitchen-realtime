@@ -12,6 +12,7 @@ import { Form } from "@/components/ui/form";
 import {
   INITIAL_CREATE_USER_FORM,
   INITIAL_STATE_CREATE_USER,
+  ROLE_LIST,
 } from "@/constants/auth-constant";
 import {
   CreateUserForm,
@@ -19,10 +20,12 @@ import {
 } from "@/validations/auth-validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { startTransition, useActionState, useEffect } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { createUser } from "../action";
+import FormSelect from "@/components/common/form-select";
+import FormImage from "@/components/common/form-image";
 
 export default function DialogCreateUser({ refetch }: { refetch: () => void }) {
   const form = useForm<CreateUserForm>({
@@ -35,10 +38,14 @@ export default function DialogCreateUser({ refetch }: { refetch: () => void }) {
     INITIAL_STATE_CREATE_USER
   );
 
+  const [preview, setPreview] = useState<
+    { file: File; displayUrl: string } | undefined
+  >();
+
   const onSubmit = form.handleSubmit(async (data) => {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      formData.append(key, value);
+      formData.append(key, key === "avatar_url" ? preview!.file ?? "" : value);
     });
 
     startTransition(() => {
@@ -56,6 +63,7 @@ export default function DialogCreateUser({ refetch }: { refetch: () => void }) {
     if (createUserState.status === "success") {
       toast.success("Create User Success");
       form.reset();
+      setPreview(undefined);
       document.querySelector<HTMLButtonElement>('[data-state="open"]')?.click();
       refetch();
     }
@@ -81,11 +89,18 @@ export default function DialogCreateUser({ refetch }: { refetch: () => void }) {
             placeholder="example@gmail.com"
             type="email"
           />
-          <FormInput
+          <FormImage
+            form={form}
+            label="Avatar"
+            name="avatar_url"
+            preview={preview}
+            setPreview={setPreview}
+          />
+          <FormSelect
             form={form}
             label="Role"
             name="role"
-            placeholder="Insert your role"
+            selectItem={ROLE_LIST}
           />
           <FormInput
             form={form}
