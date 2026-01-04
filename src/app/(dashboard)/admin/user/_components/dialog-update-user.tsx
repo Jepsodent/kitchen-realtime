@@ -60,7 +60,7 @@ export default function DialogUpdateUser({
 
   useEffect(() => {
     if (updateUserState.status === "error") {
-      toast.error("Login Failed", {
+      toast.error("Update User Failed", {
         description: updateUserState.errors?._form?.[0],
       });
     }
