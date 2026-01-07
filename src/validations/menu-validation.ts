@@ -1,5 +1,5 @@
 import z from "zod";
-
+// type
 export const menuSchema = z.object({
     name: z.string(),
     description: z.string(),
@@ -13,6 +13,8 @@ export const menuSchema = z.object({
     is_available: z.boolean()
 })
 
+
+// createMenu / update menu
 export const createMenuSchemaForm = z.object({
     name: z.string().min(1, 'Name is required'),
     description: z.string().min(1, 'Description is required'),
