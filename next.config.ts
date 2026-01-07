@@ -1,7 +1,23 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
+  // devIndicators: true,
+  images: {
+    domains: ['https://zmxzgpqsrsjcemtlpcmu.supabase.co'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'zmxzgpqsrsjcemtlpcmu.supabase.co',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;
