@@ -1,83 +1,87 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { createClient } from "@/lib/supabase/client";
-import { toast } from "sonner";
 import DataTable from "@/components/common/data-table";
-import { HEADER_TABLE_USER } from "@/constants/user-constant";
-import { useMemo, useState } from "react";
 import DropdownAction from "@/components/common/dropdown-action";
-import { Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { HEADER_TABLE_TABLE } from "@/constants/table-constant";
 import useDataTable from "@/hooks/use-data-table";
-import DialogCreateUser from "./dialog-create-user";
-import { Profile } from "@/types/auth";
-import DialogUpdateUser from "./dialog-update-user";
-import DialogDeleteUser from "./dialog-delete-user";
+import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+import { Table } from "@/validations/table-validation";
+import { useQuery } from "@tanstack/react-query";
+import { Pencil, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
-export default function UserManagement() {
+export default function TableManagement() {
   const supabase = createClient();
   const {
     currentPage,
     currentLimit,
     handleChangeLimit,
-    handleChangePage,
     currentSearch,
+    handleChangePage,
     handleChangeSearch,
   } = useDataTable();
 
   const {
-    data: users,
+    data: tables,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["users", currentPage, currentLimit, currentSearch],
+    queryKey: ["tables", currentPage, currentLimit, currentSearch],
     queryFn: async () => {
-      const result = await supabase
-        .from("profiles")
+      const query = supabase
+        .from("tables")
         .select("*", { count: "exact" })
-        /*
-          page = 1
-          limit = 10
-          .range(0,9) -> 0 indexing
-          page = 2
-          limit = 10
-          .range(10,19)
-        */
         .range((currentPage - 1) * currentLimit, currentPage * currentLimit - 1)
-        .order("created_at")
-        .ilike("name", `%${currentSearch}%`);
+        .order("created_at");
 
-      if (result.error)
-        toast.error("Get User data failed", {
+      if (currentSearch) {
+        query.or(
+          `name.ilike.%${currentSearch}%,capacity.ilike.%${currentSearch}%,status.ilike.%${currentSearch}%`,
+        );
+      }
+      const result = await query;
+      if (result.error) {
+        toast.error("Get Table data failed", {
           description: result.error.message,
         });
+      }
 
       return result;
     },
   });
 
   const [selectedAction, setSelectedAction] = useState<{
-    data: Profile;
+    data: Table;
     type: "update" | "delete";
   } | null>();
 
   const handleChangeAction = (open: boolean) => {
-    if (!open) {
-      setSelectedAction(null);
-    }
+    if (!open) setSelectedAction(null);
   };
 
   const filteredData = useMemo(() => {
-    console.log(users?.data);
-    return (users?.data || []).map((user, index) => {
+    return (tables?.data || []).map((table: Table, index) => {
       return [
         currentLimit * (currentPage - 1) + index + 1,
-        user.id,
-        user.name,
-        user.role,
+        <div>
+          <h4 className="font-bold">{table.name}</h4>
+          <p className="text-xs">{table.description}</p>
+        </div>,
+        table.capacity,
+        <div
+          className={cn("px-2 py-1 rounded-full text-white w-fit capitalize", {
+            "bg-green-600": table.status === "available",
+            "bg-red-600": table.status === "unavailable",
+            "bg-yellow-600": table.status === "reserved",
+          })}
+        >
+          {table.status}
+        </div>,
         <DropdownAction
           menu={[
             {
@@ -90,7 +94,7 @@ export default function UserManagement() {
               ),
               action: () => {
                 setSelectedAction({
-                  data: user,
+                  data: table,
                   type: "update",
                 });
               },
@@ -105,7 +109,7 @@ export default function UserManagement() {
               ),
               action: () => {
                 setSelectedAction({
-                  data: user,
+                  data: table,
                   type: "delete",
                 });
               },
@@ -115,52 +119,40 @@ export default function UserManagement() {
         />,
       ];
     });
-  }, [users]);
+  }, [tables]);
 
   const totalPages = useMemo(() => {
-    return users && users.count != null
-      ? Math.ceil(users.count / currentLimit)
+    return tables && tables.count != null
+      ? Math.ceil(tables.count / currentLimit)
       : 0;
-  }, [users]);
+  }, [tables]);
 
   return (
-    <div className="w-full ">
+    <div className="w-full">
       <div className="flex flex-col lg:flex-row mb-4 gap-2 justify-between w-full">
-        <h1 className="text-2xl font-bold">User Management</h1>
+        <h1 className="text-2xl font-bold">Table Management</h1>
         <div className="flex gap-2">
           <Input
-            placeholder="Search by name"
+            placeholder="Search by name , capacity and status"
             onChange={(e) => handleChangeSearch(e.target.value)}
           />
           <Dialog>
             <DialogTrigger asChild>
               <Button variant={"outline"}>Create</Button>
             </DialogTrigger>
-            <DialogCreateUser refetch={refetch} />
+            {/* later */}
           </Dialog>
         </div>
       </div>
       <DataTable
-        header={HEADER_TABLE_USER}
+        header={HEADER_TABLE_TABLE}
         data={filteredData}
         isLoading={isLoading}
         totalPages={totalPages}
         currentPage={currentPage}
         currentLimit={currentLimit}
-        onChangePage={handleChangePage}
         onChangeLimit={handleChangeLimit}
-      />
-      <DialogUpdateUser
-        open={selectedAction !== null && selectedAction?.type === "update"}
-        refetch={refetch}
-        currentData={selectedAction?.data}
-        handleChangeAction={handleChangeAction}
-      />
-      <DialogDeleteUser
-        open={selectedAction !== null && selectedAction?.type === "delete"}
-        refetch={refetch}
-        currentData={selectedAction?.data}
-        handleChangeAction={handleChangeAction}
+        onChangePage={handleChangePage}
       />
     </div>
   );

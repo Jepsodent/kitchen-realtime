@@ -53,7 +53,7 @@ export default function MenuManagement() {
 
       if (currentSearch) {
         query.or(
-          `name.ilike.%${currentSearch}%,category.ilike.%${currentSearch}%`
+          `name.ilike.%${currentSearch}%,category.ilike.%${currentSearch}%`,
         );
       }
       const result = await query;
@@ -103,7 +103,7 @@ export default function MenuManagement() {
         <div
           className={cn(
             "px-2 py-1 rounded-full text-white w-fit",
-            menu.is_available ? "bg-green-600" : "bg-red-500"
+            menu.is_available ? "bg-green-600" : "bg-red-500",
           )}
         >
           {menu.is_available ? "Available" : "Not Available"}
@@ -148,6 +148,7 @@ export default function MenuManagement() {
   }, [menus]);
 
   const totalPages = useMemo(() => {
+    console.log(menus?.count);
     return menus && menus.count != null
       ? Math.ceil(menus.count / currentLimit)
       : 0;
