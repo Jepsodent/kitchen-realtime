@@ -5,5 +5,5 @@ export const metadata = {
 };
 
 export default function Table() {
-  return <TableManagement></TableManagement>;
+  return <TableManagement />;
 }

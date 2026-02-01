@@ -14,6 +14,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Pencil, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import DialogCreateTable from "./dialog-create-table";
+import DialogUpdateTable from "./dialog-update-table";
+import DialogDeleteTable from "./dialog-delete-table";
 
 export default function TableManagement() {
   const supabase = createClient();
@@ -41,7 +44,7 @@ export default function TableManagement() {
 
       if (currentSearch) {
         query.or(
-          `name.ilike.%${currentSearch}%,capacity.ilike.%${currentSearch}%,status.ilike.%${currentSearch}%`,
+          `name.ilike.%${currentSearch}%,description.ilike.%${currentSearch}%`,
         );
       }
       const result = await query;
@@ -133,14 +136,14 @@ export default function TableManagement() {
         <h1 className="text-2xl font-bold">Table Management</h1>
         <div className="flex gap-2">
           <Input
-            placeholder="Search by name , capacity and status"
+            placeholder="Search by name or description"
             onChange={(e) => handleChangeSearch(e.target.value)}
           />
           <Dialog>
             <DialogTrigger asChild>
               <Button variant={"outline"}>Create</Button>
             </DialogTrigger>
-            {/* later */}
+            <DialogCreateTable refetch={refetch} />
           </Dialog>
         </div>
       </div>
@@ -153,6 +156,18 @@ export default function TableManagement() {
         currentLimit={currentLimit}
         onChangeLimit={handleChangeLimit}
         onChangePage={handleChangePage}
+      />
+      <DialogUpdateTable
+        open={selectedAction !== null && selectedAction?.type == "update"}
+        refetch={refetch}
+        currentData={selectedAction?.data}
+        handleChangeAction={handleChangeAction}
+      />
+      <DialogDeleteTable
+        open={selectedAction !== null && selectedAction?.type == "delete"}
+        handleChangeAction={handleChangeAction}
+        refetch={refetch}
+        currentData={selectedAction?.data}
       />
     </div>
   );
