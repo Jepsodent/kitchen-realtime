@@ -71,6 +71,7 @@ export default function UserManagement() {
   };
 
   const filteredData = useMemo(() => {
+    console.log(users?.data);
     return (users?.data || []).map((user, index) => {
       return [
         currentLimit * (currentPage - 1) + index + 1,
