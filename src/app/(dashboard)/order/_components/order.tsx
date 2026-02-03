@@ -11,9 +11,19 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Table } from "@/validations/table-validation";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import DialogCreateOrder from "./dialog-create-order";
+import { updateReservation } from "../action";
+import { INITIAL_STATE_ACTION } from "@/constants/general-constant";
+import { Ban, Link2Icon, ScrollText } from "lucide-react";
+import Link from "next/link";
 
 export default function OrderManagement() {
   const supabase = createClient();
@@ -82,6 +92,66 @@ export default function OrderManagement() {
     if (!open) setSelectedAction(null);
   };
 
+  const [reservedState, reservedAction] = useActionState(
+    updateReservation,
+    INITIAL_STATE_ACTION,
+  );
+
+  const handleReservation = async ({
+    id,
+    table_id,
+    status,
+  }: {
+    id: string;
+    table_id: string;
+    status: string;
+  }) => {
+    const formData = new FormData();
+    Object.entries({ id, table_id, status }).forEach(([key, value]) =>
+      formData.append(key, value),
+    );
+
+    startTransition(() => {
+      reservedAction(formData);
+    });
+  };
+  useEffect(() => {
+    if (reservedState?.status === "error") {
+      toast.error("Update Reservation Failed", {
+        description: reservedState.error?._form[0],
+      });
+    }
+
+    if (reservedState.status === "success") {
+      toast.success("Update Reservation Success");
+      refetch();
+    }
+  }, [reservedState]);
+
+  const reservedActionList = [
+    {
+      label: (
+        <span className="flex gap-2 items-center">
+          <Link2Icon />
+          Process
+        </span>
+      ),
+      action: (id: string, table_id: string) =>
+        handleReservation({ id, table_id, status: "process" }),
+    },
+    {
+      label: (
+        <span className="flex gap-2 items-center">
+          <Ban className="text-red-500" />
+          Cancel
+        </span>
+      ),
+      action: (id: string, table_id: string) => {
+        handleReservation({ id, table_id, status: "canceled" });
+      },
+    },
+  ];
+
   const filteredData = useMemo(() => {
     return (orders?.data || []).map((order, index) => {
       return [
@@ -99,7 +169,32 @@ export default function OrderManagement() {
         >
           {order.status}
         </div>,
-        <DropdownAction menu={[]} />,
+        <DropdownAction
+          menu={
+            order.status === "reserved"
+              ? reservedActionList.map((item) => ({
+                  label: item.label,
+                  action: () => {
+                    item.action(
+                      order.id,
+                      (order.tables as unknown as { id: string }).id,
+                    );
+                  },
+                }))
+              : [
+                  {
+                    label: (
+                      <Link href={`/order/${order.order_id}`}>
+                        {" "}
+                        <ScrollText />
+                        Detail
+                      </Link>
+                    ),
+                    type: "link",
+                  },
+                ]
+          }
+        />,
       ];
     });
   }, [orders]);
