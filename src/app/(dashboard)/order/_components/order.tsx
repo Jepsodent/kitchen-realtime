@@ -11,9 +11,9 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Table } from "@/validations/table-validation";
 import { useQuery } from "@tanstack/react-query";
-// import { Pencil, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import DialogCreateOrder from "./dialog-create-order";
 
 export default function OrderManagement() {
   const supabase = createClient();
@@ -35,9 +35,12 @@ export default function OrderManagement() {
     queryFn: async () => {
       const query = supabase
         .from("orders")
-        .select(`id, order_id, customer_name, status, tables(name, id)`, {
-          count: "exact",
-        })
+        .select(
+          `id, order_id, customer_name, status,payment_url, tables(name, id)`,
+          {
+            count: "exact",
+          },
+        )
         .range((currentPage - 1) * currentLimit, currentPage * currentLimit - 1)
         .order("created_at");
 
@@ -57,10 +60,23 @@ export default function OrderManagement() {
     },
   });
 
+  const { data: tables, refetch: refetchTables } = useQuery({
+    queryKey: ["tables"],
+    queryFn: async () => {
+      const result = await supabase
+        .from("tables")
+        .select("*")
+        .order("created_at")
+        .order("status");
+
+      return result.data;
+    },
+  });
+
   const [selectedAction, setSelectedAction] = useState<{
     data: Table;
     type: "update" | "delete";
-  } | null>();
+  } | null>(null);
 
   const handleChangeAction = (open: boolean) => {
     if (!open) setSelectedAction(null);
@@ -97,7 +113,7 @@ export default function OrderManagement() {
   return (
     <div className="w-full">
       <div className="flex flex-col lg:flex-row mb-4 gap-2 justify-between w-full">
-        <h1 className="text-2xl font-bold">Table Management</h1>
+        <h1 className="text-2xl font-bold">Order Management</h1>
         <div className="flex gap-2">
           <Input
             placeholder="Search by name or description"
@@ -107,6 +123,7 @@ export default function OrderManagement() {
             <DialogTrigger asChild>
               <Button variant={"outline"}>Create</Button>
             </DialogTrigger>
+            <DialogCreateOrder refetch={refetch} tables={tables} />
           </Dialog>
         </div>
       </div>
