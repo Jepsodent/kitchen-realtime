@@ -135,3 +135,26 @@ export async function addOrderItem(
     },
   };
 }
+
+export async function updateStatusOrderItem(
+  prevState: FormState,
+  formData: FormData,
+) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("orders_menu")
+    .update({ status: formData.get("status") })
+    .eq("id", formData.get("id"));
+
+  if (error) {
+    return {
+      status: "error",
+      errors: {
+        ...prevState,
+        _form: [error.message],
+      },
+    };
+  }
+
+  return { status: "success" };
+}
