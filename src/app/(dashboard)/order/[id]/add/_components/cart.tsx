@@ -7,6 +7,7 @@ import useDebounce from "@/hooks/use-debounce";
 import { convertIDR } from "@/lib/utils";
 import { Cart } from "@/types/order";
 import { Menu } from "@/validations/menu-validation";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { Dispatch, SetStateAction } from "react";
 
@@ -15,6 +16,8 @@ export default function CartSection({
   carts,
   setCarts,
   onAddToCart,
+  onOrder,
+  isLoading,
 }: {
   order:
     | {
@@ -27,6 +30,8 @@ export default function CartSection({
   carts: Cart[];
   setCarts: Dispatch<SetStateAction<Cart[]>>;
   onAddToCart: (item: Menu, type: "increment" | "decrement") => void;
+  onOrder: () => void;
+  isLoading: boolean;
 }) {
   const debounce = useDebounce();
 
@@ -125,12 +130,21 @@ export default function CartSection({
             <p className="text-sm">No item in cart</p>
           )}
         </div>
-        <div className="flex flex-col gap-4">
-          <p className="font-bold text-lg">Total: {convertIDR(totalPrice())}</p>
-          <Button className="w-full bg-teal-500 text-white hover:bg-teal-600">
-            Order
-          </Button>
-        </div>
+        {carts.length > 0 && (
+          <div className="flex flex-col gap-4">
+            <p className="font-bold text-lg">
+              Total: {convertIDR(totalPrice())}
+            </p>
+            <form>
+              <Button
+                formAction={onOrder}
+                className="w-full bg-teal-500 text-white hover:bg-teal-600"
+              >
+                {isLoading ? <Loader2 /> : "Order"}
+              </Button>
+            </form>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

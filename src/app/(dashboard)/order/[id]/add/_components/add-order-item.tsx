@@ -10,11 +10,15 @@ import { toast } from "sonner";
 import CardMenu from "./card-menu";
 import LoadingCardMenu from "./loading-card-menu";
 import CartSection from "./cart";
-import { useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
 import { Cart } from "@/types/order";
 import { Menu } from "@/validations/menu-validation";
+import { addOrderItem } from "../../../action";
+import { INITIAL_STATE_ACTION } from "@/constants/general-constant";
+import { useRouter } from "next/navigation";
 
 export default function AddOrderItem({ id }: { id: string }) {
+  const router = useRouter();
   const supabase = createClient();
   const {
     currentFilter,
@@ -126,6 +130,37 @@ export default function AddOrderItem({ id }: { id: string }) {
     }
   };
 
+  const [addOrderItemState, addOrderItemAction, isPendingAddOrderItem] =
+    useActionState(addOrderItem, INITIAL_STATE_ACTION);
+
+  useEffect(() => {
+    if (addOrderItemState.status === "error") {
+      toast.error("Add Order Failed ");
+    } else if (addOrderItemState.status === "success") {
+      toast.success("Add Order Success");
+      const timer = setTimeout(() => {
+        router.push(`/order/${id}`);
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      return;
+    }
+  }, [addOrderItemState.status, id]);
+
+  const handleOrder = async () => {
+    const data = {
+      order_id: id,
+      items: carts.map((item) => ({
+        order_id: order?.id ?? "",
+        ...item,
+        status: "pending",
+      })),
+    };
+    startTransition(() => {
+      addOrderItemAction(data);
+    });
+  };
+
   return (
     <div className="flex flex-col lg:flex-row gap-8 w-full">
       <div className="space-y-8 lg:w-2/3">
@@ -173,6 +208,8 @@ export default function AddOrderItem({ id }: { id: string }) {
           carts={carts}
           onAddToCart={handleAddToCart}
           setCarts={setCarts}
+          onOrder={handleOrder}
+          isLoading={isPendingAddOrderItem}
         />
       </div>
     </div>
