@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { FILTER_MENU } from "@/constants/orders-constant";
 import useDataTable from "@/hooks/use-data-table";
 import { createClient } from "@/lib/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import CardMenu from "./card-menu";
 import LoadingCardMenu from "./loading-card-menu";
@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 export default function AddOrderItem({ id }: { id: string }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const supabase = createClient();
   const {
     currentFilter,
@@ -57,7 +58,7 @@ export default function AddOrderItem({ id }: { id: string }) {
     queryFn: async () => {
       const result = await supabase
         .from("orders")
-        .select("id, customer_name, status, payment_url , tables(name,id)")
+        .select("id, customer_name, status, payment_token , tables(name,id)")
         .eq("order_id", id)
         .single();
 
@@ -138,6 +139,7 @@ export default function AddOrderItem({ id }: { id: string }) {
       toast.error("Add Order Failed ");
     } else if (addOrderItemState.status === "success") {
       toast.success("Add Order Success");
+      queryClient.invalidateQueries({ queryKey: ["orders_menu", id] });
       const timer = setTimeout(() => {
         router.push(`/order/${id}`);
       }, 500);

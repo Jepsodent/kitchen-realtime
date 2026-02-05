@@ -1,10 +1,16 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { usePricing } from "@/hooks/use-pricing";
-import { convertIDR } from "@/lib/utils";
+import { cn, convertIDR } from "@/lib/utils";
 import { Menu } from "@/validations/menu-validation";
+import { startTransition, useActionState, useEffect, useMemo } from "react";
+import { generatePayment } from "../../action";
+import { INITIAL_STATE_GENERATE_PAYMENT } from "@/constants/orders-constant";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Summary({
   order,
@@ -30,6 +36,40 @@ export default function Summary({
   id: string;
 }) {
   const { grandTotal, service, tax, totalPrice } = usePricing(orderMenu);
+
+  const isAllServed = useMemo(() => {
+    return orderMenu?.every((item) => item.status === "served");
+  }, [orderMenu]);
+
+  const [
+    generatePaymentState,
+    generatePaymentAction,
+    isPendingGeneratePayment,
+  ] = useActionState(generatePayment, INITIAL_STATE_GENERATE_PAYMENT);
+
+  const handleGeneratePayment = () => {
+    const formData = new FormData();
+    formData.append("id", id || "");
+    formData.append("gross_amount", totalPrice.toString() || "");
+    formData.append("customer_name", order?.customer_name || "");
+
+    startTransition(() => {
+      generatePaymentAction(formData);
+    });
+  };
+
+  useEffect(() => {
+    if (generatePaymentState.status === "error") {
+      toast.error("Generate Payment Failed", {
+        description: generatePaymentState.errors?._form[0],
+      });
+    }
+
+    if (generatePaymentState.status === "success") {
+      window.snap.pay(generatePaymentState.data?.payment_token);
+    }
+  }, [generatePaymentState]);
+
   return (
     <Card className="w-full shadow-sm">
       <CardContent className="space-y-4">
@@ -70,6 +110,23 @@ export default function Summary({
             <p className="text-sm">{convertIDR(grandTotal)}</p>
           </div>
         </div>
+        {order?.status === "process" && (
+          <Button
+            type="submit"
+            onClick={handleGeneratePayment}
+            disabled={!isAllServed || isPendingGeneratePayment}
+            className={cn(
+              "w-full font-semibold bg-teal-500 hover:bg-teal-600 text-white cursor-pointer",
+              !isAllServed && "bg-accent-foreground",
+            )}
+          >
+            {isPendingGeneratePayment ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Pay"
+            )}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

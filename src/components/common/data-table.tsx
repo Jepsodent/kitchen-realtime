@@ -40,7 +40,7 @@ export default function DataTable({
   onChangePage: (page: number) => void;
   onChangeLimit: (limit: number) => void;
 }) {
-  console.log(data);
+  // console.log(data);
   return (
     <div className="w-full flex flex-col gap-4">
       <Card className="p-0">
