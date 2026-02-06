@@ -11,6 +11,7 @@ import { generatePayment } from "../../action";
 import { INITIAL_STATE_GENERATE_PAYMENT } from "@/constants/orders-constant";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuthStore } from "@/stores/auth-store";
 
 export default function Summary({
   order,
@@ -36,7 +37,7 @@ export default function Summary({
   id: string;
 }) {
   const { grandTotal, service, tax, totalPrice } = usePricing(orderMenu);
-
+  const profile = useAuthStore((state) => state.profile);
   const isAllServed = useMemo(() => {
     return orderMenu?.every((item) => item.status === "served");
   }, [orderMenu]);
@@ -110,7 +111,7 @@ export default function Summary({
             <p className="text-sm">{convertIDR(grandTotal)}</p>
           </div>
         </div>
-        {order?.status === "process" && (
+        {order?.status === "process" && profile.role !== "kitchen" && (
           <Button
             type="submit"
             onClick={handleGeneratePayment}

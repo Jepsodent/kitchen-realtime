@@ -14,16 +14,25 @@ export default function Success() {
   const { mutate } = useMutation({
     mutationKey: ["mutateUpdateStatusOrder"],
     mutationFn: async () => {
-      await supabase
+      const { data } = await supabase
         .from("orders")
         .update({ status: "settled" })
-        .eq("order_id", order_id);
+        .eq("order_id", order_id)
+        .select()
+        .single();
+
+      if (data) {
+        await supabase
+          .from("tables")
+          .update({ status: "available" })
+          .eq("id", data.table_id);
+      }
     },
   });
 
   useEffect(() => {
     mutate();
-  }, [order_id]);
+  }, [order_id, mutate]);
   return (
     <div className="w-full flex flex-col justify-center items-center gap-4">
       <CheckCircle className=" size-32 text-green-400" />

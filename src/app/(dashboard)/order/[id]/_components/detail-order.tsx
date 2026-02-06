@@ -20,9 +20,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EllipsisVertical } from "lucide-react";
+import { useAuthStore } from "@/stores/auth-store";
 
 export default function DetailOrderPage({ id }: { id: string }) {
   const supabase = createClient();
+  const profile = useAuthStore((state) => state.profile);
 
   const { currentPage, handleChangePage, currentLimit, handleChangeLimit } =
     useDataTable();
@@ -186,9 +188,11 @@ export default function DetailOrderPage({ id }: { id: string }) {
     <div className="w-full space-y-4">
       <div className="flex items-center  justify-between gap-4 w-full">
         <h1 className="text-xl">Detail Order</h1>
-        <Link href={`/order/${id}/add`}>
-          <Button> Add Order Item</Button>
-        </Link>
+        {profile.role !== "kitchen" && (
+          <Link href={`/order/${id}/add`}>
+            <Button> Add Order Item</Button>
+          </Link>
+        )}
       </div>
       <div className="flex flex-col lg:flex-row gap-4 w-full">
         <div className="w-2/3">
