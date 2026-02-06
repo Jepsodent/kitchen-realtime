@@ -27,10 +27,8 @@ import { toast } from "sonner";
 import { createOrder } from "../action";
 
 export default function DialogCreateOrder({
-  refetch,
   tables,
 }: {
-  refetch: () => void;
   tables: Table[] | undefined | null;
 }) {
   const form = useForm<OrderForm>({
@@ -56,7 +54,6 @@ export default function DialogCreateOrder({
       toast.success("Create order success");
       form.reset();
       document.querySelector<HTMLButtonElement>("[data-state=open]")?.click();
-      refetch();
     } else if (createOrderState.status === "error") {
       toast.error("Create order failed", {
         description: createOrderState.errors?._form[0],

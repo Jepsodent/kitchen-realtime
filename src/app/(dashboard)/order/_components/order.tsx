@@ -7,7 +7,7 @@ import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { HEADER_TABLE_ORDER } from "@/constants/orders-constant";
 import useDataTable from "@/hooks/use-data-table";
-import { createClient } from "@/lib/supabase/client";
+import { createClientSupabase } from "@/lib/supabase/default";
 import { cn } from "@/lib/utils";
 import { Table } from "@/validations/table-validation";
 import { useQuery } from "@tanstack/react-query";
@@ -27,7 +27,7 @@ import Link from "next/link";
 import { useAuthStore } from "@/stores/auth-store";
 
 export default function OrderManagement() {
-  const supabase = createClient();
+  const supabase = createClientSupabase();
   const profile = useAuthStore((state) => state.profile);
 
   const {
@@ -86,6 +86,30 @@ export default function OrderManagement() {
     },
   });
 
+  useEffect(() => {
+    if (!orders) return;
+
+    const channel = supabase
+      .channel("change_order_managemnet")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+        },
+        () => {
+          refetch();
+          refetchTables();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [orders]);
+
   const [selectedAction, setSelectedAction] = useState<{
     data: Table;
     type: "update" | "delete";
@@ -127,7 +151,6 @@ export default function OrderManagement() {
 
     if (reservedState.status === "success") {
       toast.success("Update Reservation Success");
-      refetch();
     }
   }, [reservedState]);
 
@@ -222,7 +245,7 @@ export default function OrderManagement() {
               <DialogTrigger asChild>
                 <Button variant={"outline"}>Create</Button>
               </DialogTrigger>
-              <DialogCreateOrder refetch={refetch} tables={tables} />
+              <DialogCreateOrder tables={tables} />
             </Dialog>
           )}
         </div>
