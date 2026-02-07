@@ -6,7 +6,6 @@ import { Cart, OrderFormState } from "@/types/order";
 import { orderFormSchema } from "@/validations/order-validation";
 import midtrans from "midtrans-client";
 import { revalidatePath } from "next/cache";
-import { id } from "zod/v4/locales";
 
 export async function createOrder(
   prevState: OrderFormState,
@@ -177,7 +176,7 @@ export async function generatePayment(
     serverKey: environment.MIDTRANS_SERVER_KEY,
   });
 
-  let parameter = {
+  const parameter = {
     transaction_details: {
       order_id: `${orderId}`,
       gross_amount: parseFloat(grossAmount as string),

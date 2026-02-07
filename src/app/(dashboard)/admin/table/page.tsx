@@ -1,7 +1,7 @@
 import TableManagement from "./_components/table";
 
 export const metadata = {
-  title: "WPU Cafe | Table Management",
+  title: "Cafe | Table Management",
 };
 
 export default function Table() {

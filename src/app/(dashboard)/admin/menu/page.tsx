@@ -1,7 +1,7 @@
 import MenuManagement from "./_components/menu";
 
 export const metadata = {
-  title: "WPU | Menu Management",
+  title: "Cafe | Menu Management",
 };
 export default function UserPage() {
   return <MenuManagement />;

@@ -3,7 +3,7 @@ import DetailOrderPage from "./_components/detail-order";
 import { environment } from "@/configs/environment";
 
 export const metadata = {
-  title: "WPU Cafe | Detail Order",
+  title: "Cafe | Detail Order",
 };
 
 declare global {
@@ -24,6 +24,7 @@ export default async function DetailOrder({
         src={`${environment.MIDTRANS_API_URL}/snap/snap.js`}
         data-client-key={environment.MIDTRANS_CLIENT_KEY}
         strategy="lazyOnload"
+        unsafe-inline
       />
       <DetailOrderPage id={id} />
     </div>
